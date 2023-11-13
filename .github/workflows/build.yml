@@ -1,4 +1,4 @@
-name: Rad Build
+name: Kernel Build
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ on:
 jobs:
   build:
     if: github.event.repository.owner.id == github.event.sender.id
-    runs-on: self-hosted
+    runs-on: buildjet-32vcpu-ubuntu-2204
     permissions:
       contents: write
     steps:
@@ -28,8 +28,8 @@ jobs:
       run: |
         sudo apt update  &> /dev/null
         sudo apt -y install gawk aria2 git ccache automake flex lzop bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng maven libssl-dev pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl bc libc6-dev-i386 lib32ncurses5-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc unzip device-tree-compiler python2 python3 &> /dev/null
-        git config --global user.name "builder"
-        git config --global user.email "delta@builder.com"
+        git config --global user.name "rad"
+        git config --global user.email "gitpod"
         mkdir -p $GITHUB_WORKSPACE/project
           
     - name: Prepare TC
@@ -53,10 +53,10 @@ jobs:
         export DATE=$(date "+%Y%m%d-%H%M")
         echo "BUILD_DATE=$(date "+%Y%m%d%H%M")" >> $GITHUB_ENV
         export ARCH=arm64
-        export KBUILD_BUILD_HOST=Rad@gitpod
-        export KBUILD_BUILD_USER=Radinka
+        export KBUILD_BUILD_HOST=DeltaHost
+        export KBUILD_BUILD_USER=Troublescope
         export KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-        echo "-RadKernel[beta]" > localversion
+        echo "rad-kernel" > localversion
         make O=out ARCH=$ARCH ${{ github.event.inputs.KERNEL_DEFCONFIG }}
         make -j$(nproc --all) O=out CC=clang ARCH=$ARCH CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- LLVM=1 LLVM_IAS=1 LD=ld.lld NM=llvm-nm AR=llvm-ar OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump > $GITHUB_WORKSPACE/buildlog.txt 2>&1 || true
         cp out/arch/arm64/boot/Image.gz-dtb $GITHUB_WORKSPACE/project/Image.gz-dtb
@@ -71,9 +71,9 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/project/AnyKernel3
         cp $GITHUB_WORKSPACE/project/Image.gz-dtb Image.gz-dtb
-        zip -r9 $GITHUB_WORKSPACE/project/radkernel-Beta.zip -- *
+        zip -r9 $GITHUB_WORKSPACE/project/BionicPulse-1.0.zip -- *
         cp $GITHUB_WORKSPACE/project/Image.gz-dtb-ksu Image.gz-dtb
-        zip -r9 $GITHUB_WORKSPACE/project/radkernel-KSU-Beta.zip -- *
+        zip -r9 $GITHUB_WORKSPACE/project/BionicPulse-KSU-1.0.zip -- *
 
     - name: Upload Build Log and Release
       uses: actions/upload-artifact@v2
@@ -85,8 +85,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          ${{ github.workspace }}/project/radkernel-1.0.zip
-          ${{ github.workspace }}/project/radkernel-KSU-Beta.zip
+          ${{ github.workspace }}/project/BionicPulse-1.0.zip
+          ${{ github.workspace }}/project/BionicPulse-KSU-1.0.zip
           ${{ github.workspace }}/build-log/buildlog.txt
         name: BionicPulse-V1.0-${{ env.BUILD_DATE }}
         tag_name: ${{ env.BUILD_DATE }}
