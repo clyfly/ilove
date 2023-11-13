@@ -1,4 +1,4 @@
-name: Kernel Build
+name: Rad Build
 
 on:
   workflow_dispatch:
