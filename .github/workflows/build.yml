@@ -1,4 +1,4 @@
-name: Kernel Build
+name: Rad Build
 
 on:
   workflow_dispatch:
@@ -71,9 +71,9 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/project/AnyKernel3
         cp $GITHUB_WORKSPACE/project/Image.gz-dtb Image.gz-dtb
-        zip -r9 $GITHUB_WORKSPACE/project/BionicPulse-1.0.zip -- *
+        zip -r9 $GITHUB_WORKSPACE/project/RadKernel.zip -- *
         cp $GITHUB_WORKSPACE/project/Image.gz-dtb-ksu Image.gz-dtb
-        zip -r9 $GITHUB_WORKSPACE/project/BionicPulse-KSU-1.0.zip -- *
+        zip -r9 $GITHUB_WORKSPACE/project/RadKernel-KSU.zip -- *
 
     - name: Upload Build Log and Release
       uses: actions/upload-artifact@v2
@@ -85,8 +85,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          ${{ github.workspace }}/project/BionicPulse-1.0.zip
-          ${{ github.workspace }}/project/BionicPulse-KSU-1.0.zip
+          ${{ github.workspace }}/project/RadKernel.zip
+          ${{ github.workspace }}/project/RadKernel-KSU.zip
           ${{ github.workspace }}/build-log/buildlog.txt
         name: BionicPulse-V1.0-${{ env.BUILD_DATE }}
         tag_name: ${{ env.BUILD_DATE }}
